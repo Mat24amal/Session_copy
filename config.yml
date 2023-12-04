@@ -1,5 +1,0 @@
-user: "ansible"
-ip: "sb-vitrocam.cellnanos.uos.de"
-port: 3232
-remote_work_folder: "/home/ansible/Test"
-local_work_folder: 'C:\Users\Mateo Aedo\Desktop\test'
