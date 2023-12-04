@@ -1,11 +1,11 @@
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePosixPath, WindowsPath
 
 import yaml
 
 
 def get_folder_list(
-    work_folder_path: Path,
+    work_folder_path: Path | PurePosixPath | WindowsPath,
     remote: bool,
     ssh_user: str | None = None,
     ssh_host: str | None = None,
@@ -18,7 +18,7 @@ def get_folder_list(
     result_set = set()
 
     try:
-        if remote:
+        if type(work_folder_path) is PurePosixPath:
             # Run the 'ls' command to list folders in the specified path
             command = ["ssh", f"{ssh_user}@{ssh_host}", "ls", "-l", str(work_folder_path)]
             if ssh_port:
@@ -37,12 +37,14 @@ def get_folder_list(
             # add folder names to set
             result_set.update(folders)
 
-        else:
+        elif type(work_folder_path) is WindowsPath or type(work_folder_path) is Path:
             for username_folder in work_folder_path.iterdir():
                 if username_folder.is_dir():
                     result_set.update(
                         [str(session_folder) for session_folder in username_folder.iterdir() if session_folder.is_dir()]
                     )
+        else:
+            raise Exception(f"Unknown type of work_folder_path: {type(work_folder_path)}")
 
         return result_set
     except subprocess.CalledProcessError as e:
@@ -64,7 +66,7 @@ def create_dict_from_local_set(local_set: set) -> dict:
 
 def main(
     local_work_folder_path: Path,
-    remote_work_folder_path: Path,
+    remote_work_folder_path: PurePosixPath,
     ssh_user: str,
     ssh_host: str,
     ssh_port: int | None = None,
@@ -120,4 +122,4 @@ if __name__ == "__main__":
     if not user or not ip or not remote_work_folder or not local_work_folder:
         raise Exception("Missing config values")
 
-    main(Path(local_work_folder), Path(remote_work_folder), user, ip, port)
+    main(Path(local_work_folder), PurePosixPath(remote_work_folder), user, ip, port)
