@@ -132,4 +132,4 @@ dmypy.json
 cython_debug/
 
 # Your private config file
-config.yaml
+config.yml
