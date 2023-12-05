@@ -38,11 +38,10 @@ def get_folder_list(
             result_set.update(folders)
 
         elif type(work_folder_path) is WindowsPath or type(work_folder_path) is Path:
-            for username_folder in work_folder_path.iterdir():
-                if username_folder.is_dir():
-                    result_set.update(
-                        [str(session_folder) for session_folder in username_folder.iterdir() if session_folder.is_dir()]
-                    )
+            result_set.update(
+                [str(session_folder) for session_folder in work_folder_path.iterdir() if session_folder.is_dir()]
+            )
+
         else:
             raise Exception(f"Unknown type of work_folder_path: {type(work_folder_path)}")
 
