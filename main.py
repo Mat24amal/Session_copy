@@ -1,3 +1,4 @@
+import logging
 import subprocess
 from pathlib import Path, PurePosixPath, WindowsPath
 
@@ -38,17 +39,20 @@ def get_folder_list(
             result_set.update(folders)
 
         elif type(work_folder_path) is WindowsPath or type(work_folder_path) is Path:
-            for username_folder in work_folder_path.iterdir():
-                if username_folder.is_dir():
-                    result_set.update(
-                        [str(session_folder) for session_folder in username_folder.iterdir() if session_folder.is_dir()]
-                    )
+            for session_folder in work_folder_path.iterdir():
+                if session_folder.is_dir():
+                    # result_set.update(
+                    #     [str(session_folder.name) for session_folder in username_folder.iterdir() if session_folder.is_dir()]
+                    # )
+                    result_set.add(str(session_folder))
         else:
             raise Exception(f"Unknown type of work_folder_path: {type(work_folder_path)}")
 
         return result_set
     except subprocess.CalledProcessError as e:
         raise Exception(f"Error getting folder list from {work_folder_path}: {e}")
+
+    logging.info(f"Got folder list from {work_folder_path}")
 
 
 def create_dict_from_local_set(local_set: set) -> dict:
@@ -62,6 +66,7 @@ def create_dict_from_local_set(local_set: set) -> dict:
         session_folder_name = session_folder_path.name
         session_dict[session_folder_name] = session_folder_path
     return session_dict
+    logging.info("Created session dict")
 
 
 def main(
@@ -76,6 +81,7 @@ def main(
         remote_work_folder_path, remote=True, ssh_user=user, ssh_host=ip, ssh_port=ssh_port
     )
     local_session_folder_set = get_folder_list(local_work_folder_path, remote=False)
+    logging.info(f"Compering folder in {local_work_folder_path} with {remote_work_folder_path}")
 
     # create dict from local set
     local_session_folder_dict = create_dict_from_local_set(local_session_folder_set)
@@ -83,6 +89,7 @@ def main(
 
     # find the difference between local and remote
     new_session_folder_set = local_folder_session_name_set - remote_session_folder_set
+    logging.info(f"Found {len(new_session_folder_set)} new folders")
 
     # copy new folders to remote
     for new_session_folder_name in new_session_folder_set:
@@ -98,6 +105,7 @@ def main(
             )
         except subprocess.CalledProcessError as e:
             print(f"Error copying {new_session_folder} to {remote_work_folder_path}: {e}")
+    logging.info(f"Copied {len(new_session_folder_set)} new folders to {remote_work_folder_path}")
 
 
 def read_config(config_file_path: Path) -> dict:
@@ -112,6 +120,7 @@ def read_config(config_file_path: Path) -> dict:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     config_file_path = Path("config.yml")
     config = read_config(config_file_path)
     user = config.get("user")
@@ -123,3 +132,5 @@ if __name__ == "__main__":
         raise Exception("Missing config values")
 
     main(Path(local_work_folder), PurePosixPath(remote_work_folder), user, ip, port)
+
+# D:\Bilder\Moeller-group
