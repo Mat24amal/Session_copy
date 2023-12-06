@@ -133,3 +133,4 @@ cython_debug/
 
 # Your private config file
 config.yml
+config.yaml
