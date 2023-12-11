@@ -47,10 +47,9 @@ def get_folder_list(
             raise Exception(f"Unknown type of work_folder_path: {type(work_folder_path)}")
 
         return result_set
+        logging.info(f"Got folder list from {work_folder_path}")
     except subprocess.CalledProcessError as e:
         raise Exception(f"Error getting folder list from {work_folder_path}: {e}")
-
-    logging.info(f"Got folder list from {work_folder_path}")
 
 
 def create_dict_from_local_set(local_set: set) -> dict:
@@ -130,4 +129,4 @@ if __name__ == "__main__":
         raise Exception("Missing config values")
 
     main(Path(local_work_folder), PurePosixPath(remote_work_folder), user, ip, port)
-# w
+    input("Process finished. You can close the window to exit")
